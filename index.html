@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le féminin des noms et des adjectifs</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- RÈGLE BABEL OBLIGATOIRE -->
+    <script>
+      Babel.registerPreset('react-classic', {
+        presets: [
+          [Babel.availablePresets['react'], { runtime: 'classic' }]
+        ]
+      });
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdfa; /* Tailwind teal-50 */
+            color: #1e293b; /* Tailwind slate-800 */
+        }
+        /* Custom scrollbar for better TNI look */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0; 
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; 
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+        
+        .animate-bounce-slight {
+            animation: bounce-slight 2s infinite;
+        }
+        @keyframes bounce-slight {
+            0%, 100% { transform: translateY(-2%); }
+            50% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="min-h-screen flex flex-col"></div>
+
+    <script type="text/babel" data-presets="react-classic">
+        const { useState, useEffect } = React;
+
+        // --- DONNÉES PÉDAGOGIQUES ---
+
+        const dataNoms = [
+            {
+                id: 'noms-general',
+                icon: '🅰️',
+                title: 'Règle générale : L\'ajout d\'un -e',
+                rule: 'Je dois ajouter un -e à la fin du mot pour former le féminin des noms en général.',
+                examples: [
+                    { m: 'ami', f: 'amie' },
+                    { m: 'avocat', f: 'avocate' },
+                    { m: 'cousin', f: 'cousine' },
+                    { m: 'voisin', f: 'voisine' }
+                ],
+                warningTitle: 'Important!',
+                warningText: 'Les noms qui se terminent avec un -e gardent généralement la même forme.',
+                warningExamples: [
+                    { m: 'élève', f: 'élève' },
+                    { m: 'artiste', f: 'artiste' }
+                ],
+                quiz: [
+                    { q: 'Quel est le féminin du nom "cousin" ?', options: ['cousinne', 'cousine', 'cousin'], answer: 'cousine' },
+                    { q: 'Quel est le féminin du nom "élève" ?', options: ['élève', 'élèvee', 'éléveuse'], answer: 'élève' },
+                    { q: 'Quel est le féminin du nom "renard" ?', options: ['renard', 'renarde', 'renardse'], answer: 'renarde' }
+                ]
+            },
+            {
+                id: 'noms-transform',
+                icon: '🔄',
+                title: 'Terminaisons -er, -eau, -eur, -eux, -teur, -f',
+                rule: 'Je dois transformer la fin de ces noms pour former le féminin.',
+                transformations: [
+                    { t: '-er ➔ -ère', m: 'écolier', f: 'écolière' },
+                    { t: '-eau ➔ -elle', m: 'jumeau', f: 'jumelle' },
+                    { t: '-eur ➔ -euse', m: 'danseur', f: 'danseuse' },
+                    { t: '-eux ➔ -euse', m: 'amoureux', f: 'amoureuse' },
+                    { t: '-teur ➔ -trice', m: 'acteur', f: 'actrice' },
+                    { t: '-f ➔ -ve', m: 'sportif', f: 'sportive' }
+                ],
+                warningTitle: 'Attention aux cas particuliers!',
+                warningExamples: [
+                    { m: 'docteur', f: 'docteure' },
+                    { m: 'professeur', f: 'professeure' }
+                ],
+                quiz: [
+                    { q: 'Quel est le féminin de "jumeau" ?', options: ['jumeaude', 'jumelle', 'jumelleuse'], answer: 'jumelle' },
+                    { q: 'Quel est le féminin de "sportif" ?', options: ['sportive', 'sportife', 'sportifesse'], answer: 'sportive' },
+                    { q: 'Quel est le féminin de "professeur" (cas particulier) ?', options: ['professeuse', 'professeresse', 'professeure'], answer: 'professeure' }
+                ]
+            },
+            {
+                id: 'noms-double',
+                icon: '👯',
+                title: 'Consonne double : -el, -en, -et, -on',
+                rule: 'Je dois doubler la consonne finale et ajouter un -e.',
+                transformations: [
+                    { t: '-el ➔ -elle', m: 'colonel', f: 'colonelle' },
+                    { t: '-en ➔ -enne', m: 'chien', f: 'chienne' },
+                    { t: '-et ➔ -ette', m: 'triplet', f: 'triplette' },
+                    { t: '-on ➔ -onne', m: 'lion', f: 'lionne' }
+                ],
+                quiz: [
+                    { q: 'Quel est le féminin de "chien" ?', options: ['chiene', 'chienne', 'chienesse'], answer: 'chienne' },
+                    { q: 'Quel est le féminin de "lion" ?', options: ['lione', 'lionne', 'lionelle'], answer: 'lionne' }
+                ]
+            },
+            {
+                id: 'noms-sans-regle',
+                icon: '🤯',
+                title: 'Noms qui ne suivent aucune règle',
+                rule: 'Certains noms changent complètement! Tu dois les apprendre par cœur.',
+                examples: [
+                    { m: 'prince', f: 'princesse' },
+                    { m: 'tigre', f: 'tigresse' },
+                    { m: 'frère', f: 'sœur' },
+                    { m: 'père', f: 'mère' },
+                    { m: 'homme', f: 'femme' },
+                    { m: 'mouton', f: 'brebis' },
+                    { m: 'coq', f: 'poule' },
+                    { m: 'bœuf', f: 'vache' }
+                ],
+                quiz: [
+                    { q: 'Quel est le féminin de "mouton" ?', options: ['moutonne', 'brebis', 'chèvre'], answer: 'brebis' },
+                    { q: 'Quel est le féminin de "coq" ?', options: ['coquette', 'poulette', 'poule'], answer: 'poule' },
+                    { q: 'Quel est le féminin de "prince" ?', options: ['princesse', 'princette', 'prince'], answer: 'princesse' }
+                ]
+            },
+            {
+                id: 'noms-propres',
+                icon: '🏷️',
+                title: 'Le féminin des noms propres',
+                rule: 'Certains noms propres varient et suivent les mêmes règles que les noms communs.',
+                examples: [
+                    { m: 'Pascal', f: 'Pascale' },
+                    { m: 'Canadien', f: 'Canadienne' },
+                    { m: 'Beauceron', f: 'Beauceronne' },
+                    { m: 'Emmanuel', f: 'Emmanuelle' }
+                ],
+                quiz: [
+                    { q: 'Comment s\'écrit le féminin de "Canadien" ?', options: ['Canadiene', 'Canadienne', 'Canadienneuse'], answer: 'Canadienne' },
+                    { q: 'Comment s\'écrit le féminin de "Emmanuel" ?', options: ['Emmanuele', 'Emmanuelle', 'Emmanuel'], answer: 'Emmanuelle' }
+                ]
+            }
+        ];
+
+        const dataAdjectifs = [
+            {
+                id: 'adj-general',
+                icon: '🅰️',
+                title: 'Règle générale : L\'ajout d\'un -e',
+                rule: 'Je dois ajouter un -e à la fin de l\'adjectif.',
+                examples: [
+                    { m: 'brillant', f: 'brillante' },
+                    { m: 'grand', f: 'grande' },
+                    { m: 'joli', f: 'jolie' },
+                    { m: 'petit', f: 'petite' }
+                ],
+                warningTitle: 'Important!',
+                warningText: 'Les adjectifs terminés par -e au masculin ne changent pas.',
+                warningExamples: [
+                    { m: 'facile', f: 'facile' },
+                    { m: 'sage', f: 'sage' }
+                ],
+                quiz: [
+                    { q: 'Accorde : "Une idée (génial)"', options: ['génial', 'géniale', 'génialle'], answer: 'géniale' },
+                    { q: 'Accorde : "Une fille (sage)"', options: ['sagee', 'sagette', 'sage'], answer: 'sage' }
+                ]
+            },
+            {
+                id: 'adj-transform',
+                icon: '🔄',
+                title: 'Terminaisons -er, -eau, -eur, -eux, -teur, -f',
+                rule: 'La fin de l\'adjectif se transforme au féminin.',
+                transformations: [
+                    { t: '-er ➔ -ère', m: 'dernier', f: 'dernière' },
+                    { t: '-eau ➔ -elle', m: 'nouveau', f: 'nouvelle' },
+                    { t: '-eur ➔ -euse', m: 'rêveur', f: 'rêveuse' },
+                    { t: '-eux ➔ -euse', m: 'joyeux', f: 'joyeuse' },
+                    { t: '-teur ➔ -trice', m: 'protecteur', f: 'protectrice' },
+                    { t: '-f ➔ -ve', m: 'neuf', f: 'neuve' }
+                ],
+                warningTitle: 'Exceptions!',
+                warningExamples: [
+                    { m: 'enchanteur', f: 'enchanteresse' },
+                    { m: 'meilleur', f: 'meilleure' }
+                ],
+                quiz: [
+                    { q: 'Accorde : "Une robe (neuf)"', options: ['neufe', 'neuve', 'neuffe'], answer: 'neuve' },
+                    { q: 'Accorde : "Une maman (protecteur)"', options: ['protecteure', 'protectrice', 'protecteuse'], answer: 'protectrice' },
+                    { q: 'Accorde : "Une note (meilleur)" (Exception)', options: ['meilleuse', 'meilleur', 'meilleure'], answer: 'meilleure' }
+                ]
+            },
+            {
+                id: 'adj-double',
+                icon: '👯',
+                title: 'Consonne double : -eil, -el, -en, -et, -on, -s',
+                rule: 'Je double la consonne finale et j\'ajoute -e.',
+                transformations: [
+                    { t: '-eil ➔ -eille', m: 'pareil', f: 'pareille' },
+                    { t: '-el ➔ -elle', m: 'naturel', f: 'naturelle' },
+                    { t: '-en ➔ -enne', m: 'ancien', f: 'ancienne' },
+                    { t: '-et ➔ -ette', m: 'violet', f: 'violette' },
+                    { t: '-on ➔ -onne', m: 'bon', f: 'bonne' },
+                    { t: '-s ➔ -sse', m: 'bas', f: 'basse' }
+                ],
+                warningTitle: 'Exceptions (se terminent en -ète / -se)!',
+                warningExamples: [
+                    { m: 'complet', f: 'complète' },
+                    { m: 'secret', f: 'secrète' },
+                    { m: 'sournois', f: 'sournoise' }
+                ],
+                quiz: [
+                    { q: 'Accorde : "Une (ancien) maison"', options: ['ancienne', 'anciene', 'ancienesse'], answer: 'ancienne' },
+                    { q: 'Accorde : "Une voix (bas)"', options: ['base', 'basse', 'bassesse'], answer: 'basse' },
+                    { q: 'Accorde : "Une mission (secret)" (Exception)', options: ['secrette', 'secrète', 'secrete'], answer: 'secrète' }
+                ]
+            },
+            {
+                id: 'adj-irregulier',
+                icon: '🧩',
+                title: 'Adjectifs très irréguliers',
+                rule: 'Certains adjectifs se transforment de façon unique.',
+                examples: [
+                    { m: 'doux', f: 'douce' },
+                    { m: 'faux', f: 'fausse' },
+                    { m: 'fou', f: 'folle' },
+                    { m: 'blanc', f: 'blanche' },
+                    { m: 'sec', f: 'sèche' },
+                    { m: 'long', f: 'longue' },
+                    { m: 'vieux', f: 'vieille' },
+                    { m: 'frais', f: 'fraiche (ou fraîche)' }
+                ],
+                quiz: [
+                    { q: 'Accorde : "Une bête (fou)"', options: ['foue', 'folle', 'foule'], answer: 'folle' },
+                    { q: 'Accorde : "Une serviette (sec)"', options: ['sece', 'sèche', 'secque'], answer: 'sèche' },
+                    { q: 'Accorde : "Une (vieux) dame"', options: ['vielle', 'vieille', 'vieil'], answer: 'vieille' }
+                ]
+            }
+        ];
+
+        // --- COMPOSANTS ---
+
+        // 1. Bouton d'onglet
+        const TabButton = ({ active, onClick, icon, text, color }) => (
+            <button
+                onClick={onClick}
+                className={`flex-1 py-4 px-6 text-xl md:text-2xl font-bold rounded-t-2xl transition-all duration-300 transform ${
+                    active 
+                    ? `${color} text-white shadow-[0_-5px_15px_rgba(0,0,0,0.1)] scale-105 z-10 translate-y-2` 
+                    : 'bg-gray-200 text-gray-500 hover:bg-gray-300 hover:text-gray-700 hover:scale-105 z-0'
+                }`}
+                style={{ transformOrigin: 'bottom' }}
+            >
+                <span className="mr-2">{icon}</span> {text}
+            </button>
+        );
+
+        // 2. Carte de menu principal
+        const MenuCard = ({ item, onClick, colorClass }) => (
+            <button 
+                onClick={onClick}
+                className={`flex items-center p-6 bg-white rounded-2xl shadow-lg border-l-8 ${colorClass} hover:shadow-xl hover:scale-[1.02] transition-all text-left w-full gap-4 group`}
+            >
+                <div className="text-5xl group-hover:animate-bounce-slight">{item.icon}</div>
+                <div>
+                    <h3 className="text-2xl font-bold text-gray-800">{item.title}</h3>
+                    <p className="text-gray-500 text-lg mt-1">Découvrir la règle et s'exercer ➔</p>
+                </div>
+            </button>
+        );
+
+        // 3. Quiz / Exercice interactif
+        const QuizSection = ({ quizData, onComplete }) => {
+            const [currentIndex, setCurrentIndex] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [isCorrect, setIsCorrect] = useState(null);
+            const [score, setScore] = useState(0);
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [isFinished, setIsFinished] = useState(false);
+
+            // Réinitialisation critique quand quizData change (au cas où on change de règle)
+            useEffect(() => {
+                resetState();
+            }, [quizData]);
+
+            const resetState = () => {
+                setCurrentIndex(0);
+                setSelectedAnswer(null);
+                setIsCorrect(null);
+                setScore(0);
+                setShowFeedback(false);
+                setIsFinished(false);
+            };
+
+            const currentQ = quizData[currentIndex];
+
+            const handleAnswerClick = (option) => {
+                if (showFeedback) return; // Empêcher les clics multiples
+                
+                setSelectedAnswer(option);
+                const correct = option === currentQ.answer;
+                setIsCorrect(correct);
+                setShowFeedback(true);
+                if (correct) setScore(s => s + 1);
+            };
+
+            const handleNext = () => {
+                if (currentIndex < quizData.length - 1) {
+                    setCurrentIndex(i => i + 1);
+                    setSelectedAnswer(null);
+                    setIsCorrect(null);
+                    setShowFeedback(false);
+                } else {
+                    setIsFinished(true);
+                }
+            };
+
+            if (isFinished) {
+                return (
+                    <div className="bg-white p-8 rounded-3xl shadow-xl text-center border-4 border-indigo-100">
+                        <div className="text-7xl mb-4">🏆</div>
+                        <h3 className="text-4xl font-bold text-indigo-800 mb-4">Exercice terminé!</h3>
+                        <p className="text-2xl text-gray-700 mb-8">
+                            Ton score : <strong className="text-indigo-600 text-3xl">{score} / {quizData.length}</strong>
+                        </p>
+                        <button 
+                            onClick={resetState}
+                            className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-8 rounded-full text-2xl shadow-lg transition-transform hover:scale-105"
+                        >
+                            Recommencer cet exercice 🔄
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="bg-indigo-50 p-6 md:p-8 rounded-3xl shadow-inner border-2 border-indigo-100 mt-8">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-3xl font-extrabold text-indigo-900 flex items-center gap-2">
+                            <span>🎮</span> À ton tour!
+                        </h3>
+                        <span className="bg-white px-4 py-2 rounded-full font-bold text-indigo-600 shadow-sm border border-indigo-200">
+                            Question {currentIndex + 1} / {quizData.length}
+                        </span>
+                    </div>
+
+                    <p className="text-2xl text-gray-800 font-bold mb-8 bg-white p-6 rounded-2xl shadow-sm text-center">
+                        {currentQ.q}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        {currentQ.options.map((option, idx) => {
+                            let btnStyle = "bg-white hover:bg-indigo-100 text-indigo-700 border-2 border-indigo-200 shadow-md";
+                            
+                            if (showFeedback) {
+                                if (option === currentQ.answer) {
+                                    btnStyle = "bg-green-500 text-white border-green-600 shadow-lg scale-105"; // Bonne réponse toujours en vert
+                                } else if (option === selectedAnswer) {
+                                    btnStyle = "bg-red-500 text-white border-red-600 shadow-inner opacity-80"; // Mauvaise sélectionnée en rouge
+                                } else {
+                                    btnStyle = "bg-gray-100 text-gray-400 border-gray-200 opacity-50 cursor-not-allowed"; // Autres grisées
+                                }
+                            }
+
+                            return (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleAnswerClick(option)}
+                                    disabled={showFeedback}
+                                    className={`py-6 px-4 rounded-2xl text-2xl font-bold transition-all duration-300 break-words ${btnStyle}`}
+                                >
+                                    {option}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {showFeedback && (
+                        <div className={`p-6 rounded-2xl mb-6 text-center animate-pulse ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            <p className="text-3xl font-bold">
+                                {isCorrect ? '🟢 Bravo! C\'est la bonne réponse.' : `🔴 Oups! La bonne réponse était : ${currentQ.answer}`}
+                            </p>
+                        </div>
+                    )}
+
+                    {showFeedback && (
+                        <div className="text-center">
+                            <button 
+                                onClick={handleNext}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-full text-2xl shadow-xl transition-transform hover:scale-110"
+                            >
+                                {currentIndex < quizData.length - 1 ? 'Question Suivante ➔' : 'Voir mon résultat 🏁'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // 4. Vue d'une règle (Théorie + Exercice)
+        const RuleView = ({ ruleData, onBack, colorTheme }) => {
+            
+            const styles = {
+                blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-900', accent: 'bg-blue-100', header: 'bg-blue-600' },
+                emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-900', accent: 'bg-emerald-100', header: 'bg-emerald-600' },
+            }[colorTheme];
+
+            return (
+                <div className="animate-fade-in flex flex-col min-h-full">
+                    <button 
+                        onClick={onBack}
+                        className="self-start mb-6 flex items-center gap-2 text-gray-500 hover:text-gray-800 font-bold text-xl bg-white px-4 py-2 rounded-full shadow-sm hover:shadow transition-all"
+                    >
+                        <span>⬅️</span> Retour au menu
+                    </button>
+
+                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden flex-1 border-4 border-gray-100">
+                        <div className={`${styles.header} text-white p-6 md:p-8 flex items-center gap-4`}>
+                            <span className="text-5xl bg-white/20 p-3 rounded-2xl">{ruleData.icon}</span>
+                            <h2 className="text-3xl md:text-4xl font-extrabold">{ruleData.title}</h2>
+                        </div>
+
+                        <div className="p-6 md:p-10 space-y-8 flex-1">
+                            
+                            {/* Règle principale */}
+                            <div className={`${styles.bg} border-l-8 ${styles.border} p-6 rounded-r-2xl`}>
+                                <h3 className={`text-2xl font-bold ${styles.text} mb-2 uppercase tracking-wider`}>La Règle</h3>
+                                <p className="text-2xl text-gray-800">{ruleData.rule}</p>
+                            </div>
+
+                            {/* Exemples standards */}
+                            {ruleData.examples && (
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-700 mb-4 border-b-2 border-gray-200 pb-2">Exemples :</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {ruleData.examples.map((ex, i) => (
+                                            <div key={i} className="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-200 text-xl md:text-2xl">
+                                                <span className="text-blue-600 font-bold w-1/2 text-right pr-4">{ex.m}</span>
+                                                <span className="text-gray-400 text-3xl">➔</span>
+                                                <span className="text-pink-600 font-bold w-1/2 pl-4">{ex.f}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Transformations avec surlignage */}
+                            {ruleData.transformations && (
+                                <div>
+                                    <h3 className="text-2xl font-bold text-gray-700 mb-4 border-b-2 border-gray-200 pb-2">Comment ça change :</h3>
+                                    <div className="space-y-4">
+                                        {ruleData.transformations.map((trans, i) => (
+                                            <div key={i} className="flex flex-col md:flex-row items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                                <div className={`font-mono font-bold text-xl md:text-2xl ${styles.accent} px-4 py-2 rounded-lg text-gray-800 text-center w-full md:w-auto`}>
+                                                    {trans.t}
+                                                </div>
+                                                <div className="flex-1 flex justify-center items-center gap-4 text-2xl md:text-3xl w-full">
+                                                    <span className="text-blue-600 font-bold">{trans.m}</span>
+                                                    <span className="text-gray-400">➔</span>
+                                                    <span className="text-pink-600 font-bold">{trans.f}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Avertissement / Exceptions */}
+                            {ruleData.warningTitle && (
+                                <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-6">
+                                    <h3 className="text-2xl font-extrabold text-amber-800 flex items-center gap-2 mb-2">
+                                        <span>⚠️</span> {ruleData.warningTitle}
+                                    </h3>
+                                    {ruleData.warningText && <p className="text-xl text-amber-900 mb-4">{ruleData.warningText}</p>}
+                                    
+                                    {ruleData.warningExamples && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {ruleData.warningExamples.map((ex, i) => (
+                                                <div key={i} className="flex justify-center items-center gap-4 bg-white p-3 rounded-lg shadow-sm text-xl border border-amber-100">
+                                                    <span className="text-blue-700 font-semibold">{ex.m}</span>
+                                                    <span>➔</span>
+                                                    <span className="text-pink-700 font-semibold">{ex.f}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Section Quiz */}
+                            {ruleData.quiz && (
+                                <QuizSection quizData={ruleData.quiz} />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- COMPOSANT PRINCIPAL (APP) ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('noms'); // 'noms' ou 'adjectifs'
+            const [selectedRuleId, setSelectedRuleId] = useState(null);
+
+            // Gérer le changement d'onglet proprement
+            const handleTabChange = (tab) => {
+                setActiveTab(tab);
+                setSelectedRuleId(null); // On retourne au menu lors d'un changement d'onglet
+            };
+
+            // Trouver la règle sélectionnée pour l'affichage
+            let currentRule = null;
+            if (selectedRuleId) {
+                const dataset = activeTab === 'noms' ? dataNoms : dataAdjectifs;
+                currentRule = dataset.find(r => r.id === selectedRuleId);
+            }
+
+            return (
+                <div className="flex-1 flex flex-col max-w-6xl mx-auto w-full p-4 md:p-8">
+                    
+                    {/* Header général */}
+                    <header className="text-center mb-8 bg-white p-6 md:p-8 rounded-3xl shadow-lg border-b-8 border-indigo-400">
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                            Le féminin des <span className="text-blue-600">noms</span> et des <span className="text-emerald-600">adjectifs</span>
+                        </h1>
+                        <p className="text-xl text-gray-500 mt-4 font-semibold">
+                            Apprends à transformer les mots au féminin avec ces activités interactives!
+                        </p>
+                    </header>
+
+                    {/* Conteneur principal (Onglets + Contenu) */}
+                    <main className="flex-1 flex flex-col bg-white/50 backdrop-blur-sm rounded-3xl shadow-2xl p-2 md:p-6 mb-8 overflow-hidden border border-white">
+                        
+                        {/* Navigation des onglets */}
+                        <div className="flex gap-2 border-b-4 border-gray-200 px-2 pt-2 h-20 md:h-24">
+                            <TabButton 
+                                active={activeTab === 'noms'} 
+                                onClick={() => handleTabChange('noms')} 
+                                icon="🧑‍🏫" 
+                                text="Le féminin des noms" 
+                                color="bg-blue-600"
+                            />
+                            <TabButton 
+                                active={activeTab === 'adjectifs'} 
+                                onClick={() => handleTabChange('adjectifs')} 
+                                icon="✨" 
+                                text="Le féminin des adjectifs" 
+                                color="bg-emerald-600"
+                            />
+                        </div>
+
+                        {/* Zone de contenu défilable */}
+                        <div className="flex-1 overflow-y-auto p-4 md:p-6 mt-4">
+                            
+                            {/* Affichage du MENU si aucune règle n'est sélectionnée */}
+                            {!selectedRuleId && (
+                                <div className="animate-fade-in space-y-6">
+                                    <h2 className="text-3xl font-bold text-gray-700 mb-8 border-b-4 pb-2 border-gray-200 inline-block">
+                                        Choisis une règle à explorer :
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {(activeTab === 'noms' ? dataNoms : dataAdjectifs).map((item) => (
+                                            <MenuCard 
+                                                key={item.id} 
+                                                item={item} 
+                                                onClick={() => setSelectedRuleId(item.id)}
+                                                colorClass={activeTab === 'noms' ? 'border-blue-500' : 'border-emerald-500'}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Affichage de la RÈGLE si une règle est sélectionnée */}
+                            {selectedRuleId && currentRule && (
+                                <RuleView 
+                                    ruleData={currentRule} 
+                                    onBack={() => setSelectedRuleId(null)}
+                                    colorTheme={activeTab === 'noms' ? 'blue' : 'emerald'}
+                                />
+                            )}
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
